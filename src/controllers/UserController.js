@@ -1,14 +1,14 @@
 import User from "../models/userModel.js";
 import generateToken from "../utils/generateToken.js";
 
-const registerUser = async (req, res) => {
-  console.log("before try");
+const registerUser = async (req, res, next) => {
   try {
     const { username, email, password } = req.body;
     const userExists = await User.findOne({ email });
 
     if (userExists) {
-      return res.status(400).json({
+      next({
+        status: 404,
         message: "User or Password is exists",
       });
     }
@@ -27,15 +27,19 @@ const registerUser = async (req, res) => {
         token: generateToken(user._id),
       });
     }
-    throw new Error("Invalid user data");
+    next({
+      status: 404,
+      message: "Invalid user data",
+    });
   } catch (error) {
-    return res.json({
-      error,
+    next({
+      status: 404,
+      message: "Invalid user data",
     });
   }
 };
 
-const authUser = async (req, res) => {
+const authUser = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
@@ -50,9 +54,15 @@ const authUser = async (req, res) => {
         token: generateToken(user._id),
       });
     }
+    next({
+      status: 404,
+      message: "Email or password is incorect",
+    });
   } catch (error) {
-    res.status(401);
-    throw new Error("Invalid email or password");
+    next({
+      status: 401,
+      message: "Invalid email or password",
+    });
   }
 };
 
