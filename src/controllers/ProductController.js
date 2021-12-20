@@ -1,9 +1,11 @@
 import Product from "../models/productModel.js";
 import Image from "../models/imageModel.js";
+import User from "../models/userModel.js";
+import Favorite from "../models/favoriteModel.js";
 
-const getProducts = (_, res, next) => {
+const getProducts = async (_, res, next) => {
   try {
-    const product = Product.find({}).exec();
+    const product = await Product.find({}).exec();
     if (product) {
       res.json({
         products: product,
@@ -56,8 +58,21 @@ const createProduct = async (req, res, next) => {
       throw new Error("Product error");
     }
 
+    const user = await User.find({ _id: userId }).exec();
+
+    if (!user) {
+      throw new Error("User error");
+    }
+
+    console.log(user);
     res.json({
-      product,
+      user: user[0].username,
+      title,
+      description,
+      price,
+      ammount,
+      rating,
+      category,
       image: image.images,
     });
   } catch (error) {
@@ -68,4 +83,45 @@ const createProduct = async (req, res, next) => {
   }
 };
 
-export { getProducts, createProduct };
+const addFavorite = async (req, res, next) => {
+  try {
+    const { userId, postId } = req.body;
+    const user = await User.findOne({ _id: userId });
+    if (!user) {
+      throw new Error("User error");
+    }
+
+    const favorites = await Favorite.findOne({ _id: user.favoritePosts });
+    console.log(favorites);
+    if (!favorites) {
+      console.log("!favorite");
+      const fav = await Favorite.create({
+        favPosts: [postId],
+      });
+
+      await User.updateOne({ _id: user._id }, { favoritePosts: fav._id }, done);
+      return res.json({
+        favorites,
+      });
+    }
+
+    const done = favorites.favPosts.push(postId);
+    await favorites.save();
+
+    return res.json({
+      favorites,
+    });
+  } catch (error) {
+    next({
+      status: 404,
+      message: `Error in favorites ${error}`,
+    });
+  }
+};
+
+// const getFavorite = (req, res, next) => {
+//   const {} = req.body;
+
+// };
+
+export { getProducts, createProduct, addFavorite };

@@ -17,6 +17,8 @@ app.use("/product", productRoute);
 app.use(notFount);
 app.use(errorHandler);
 
+app.post("/", () => {});
+
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on ${PORT}`);
 });
