@@ -4,14 +4,12 @@ import User from "../models/userModel.js";
 const getProducts = async (_, res, next) => {
   try {
     const product = await Product.find({}).exec();
-    if (product) {
-      res.json({
-        products: product,
-      });
+    if (!product) {
+      throw new Error("ERROR_IN_PRODUCT");
     }
-    next({
-      status: 404,
-      message: "ERROR_IN_PRODUCT",
+
+    res.json({
+      ...product,
     });
   } catch (error) {
     next({
@@ -35,8 +33,14 @@ const createProduct = async (req, res, next) => {
       imageList,
     } = req.body;
 
+    const user = await User.findOne({ _id: userId }).exec();
+
+    if (!user) {
+      throw new Error("USER_FIND_ERROR");
+    }
+
     const product = await Product.create({
-      userId,
+      username: user.username,
       title,
       description,
       price,
@@ -50,15 +54,8 @@ const createProduct = async (req, res, next) => {
       throw new Error("PRODUCT_CREATION_ERROR");
     }
 
-    const user = await User.findOne({ _id: userId }).exec();
-
-    if (!user) {
-      throw new Error("USER_FIND_ERROR");
-    }
-
     console.log(user);
     res.json({
-      user_id: user._id,
       user: user.username,
       title,
       description,
@@ -107,20 +104,24 @@ const addFavorite = async (req, res, next) => {
 };
 
 const getFavorite = async (req, res, next) => {
-  const { userId } = req.body;
+  try {
+    const { userId } = req.body;
 
-  const user = await Product.findOne({ _id: usefavoritePosts.productId })
-    .select("favoritePosts")
-    .populate("User");
-  if (!user) {
-    throw new Error("USER_FIND_ERROR");
+    const user = await User.findOne({ _id: userId }).populate(
+      "favoritePosts.productId"
+    );
+
+    if (!user) {
+      throw new Error("USER_VALIDATE_ERROR");
+    }
+
+    res.json({ favorite: user.favoritePosts });
+  } catch (error) {
+    next({
+      status: 404,
+      message: `ERROR_IN_FAVORITES: ${error}`,
+    });
   }
-
-  // const product = await Product.find({
-  //   _id: user.favoritePosts.productId,
-  // }).populate("Product");
-  res.json({ user });
-  // const match = await res.json({});
 };
 
 export { getProducts, createProduct, addFavorite, getFavorite };

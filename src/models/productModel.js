@@ -2,10 +2,9 @@ import mongoose from "mongoose";
 import { image } from "../constants.js";
 
 const productSchema = mongoose.Schema({
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
+  username: {
+    type: String,
     required: true,
-    ref: "User",
   },
   title: {
     type: String,
