@@ -20,8 +20,7 @@ const userSchema = mongoose.Schema({
     default: false,
   },
   favoritePosts: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Favorite",
+    type: Array,
     default: null,
   },
 });

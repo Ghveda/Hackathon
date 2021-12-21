@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { image } from "../constants.js";
 
 const productSchema = mongoose.Schema({
   userId: {
@@ -14,9 +15,13 @@ const productSchema = mongoose.Schema({
     type: String,
     required: true,
   },
-  imageId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Image",
+  primaryImage: {
+    type: String,
+    default: image[0],
+  },
+  imageList: {
+    type: Array,
+    default: null,
   },
   price: {
     type: Number,

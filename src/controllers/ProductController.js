@@ -1,7 +1,5 @@
 import Product from "../models/productModel.js";
-import Image from "../models/imageModel.js";
 import User from "../models/userModel.js";
-import Favorite from "../models/favoriteModel.js";
 
 const getProducts = async (_, res, next) => {
   try {
@@ -33,16 +31,17 @@ const createProduct = async (req, res, next) => {
       ammount,
       rating,
       category,
-      images,
+      primaryImage,
+      imageList,
     } = req.body;
 
-    const image = await Image.create({
-      images,
-    });
+    // const image = await Image.create({
+    //   images,
+    // });
 
-    if (!image) {
-      throw new Error("Image error");
-    }
+    // if (!image) {
+    //   throw new Error("Image error");
+    // }
 
     const product = await Product.create({
       userId,
@@ -52,13 +51,14 @@ const createProduct = async (req, res, next) => {
       ammount,
       rating,
       category,
-      imageId: image._id,
+      primaryImage,
+      imageList,
     });
     if (!product) {
       throw new Error("Product error");
     }
 
-    const user = await User.find({ _id: userId }).exec();
+    const user = await User.findOne({ _id: userId }).exec();
 
     if (!user) {
       throw new Error("User error");
@@ -66,14 +66,16 @@ const createProduct = async (req, res, next) => {
 
     console.log(user);
     res.json({
-      user: user[0].username,
+      user_id: user._id,
+      user: user.username,
       title,
       description,
       price,
       ammount,
       rating,
       category,
-      image: image.images,
+      primaryImage,
+      imageList,
     });
   } catch (error) {
     next({
@@ -91,25 +93,18 @@ const addFavorite = async (req, res, next) => {
       throw new Error("User error");
     }
 
-    const favorites = await Favorite.findOne({ _id: user.favoritePosts });
-    console.log(favorites);
-    if (!favorites) {
-      console.log("!favorite");
-      const fav = await Favorite.create({
-        favPosts: [postId],
-      });
+    const updateFavoriteList = await User.updateOne(
+      { _id: user._id },
+      { $addToSet: { favoritePosts: postId } }
+    );
 
-      await User.updateOne({ _id: user._id }, { favoritePosts: fav._id }, done);
-      return res.json({
-        favorites,
-      });
+    if (!updateFavoriteList) {
+      throw new Error("Error in Favorite");
     }
 
-    const done = favorites.favPosts.push(postId);
-    await favorites.save();
-
     return res.json({
-      favorites,
+      user: user.username,
+      favorite: user.favoritePosts,
     });
   } catch (error) {
     next({
