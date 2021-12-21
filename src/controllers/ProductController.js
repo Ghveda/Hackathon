@@ -11,12 +11,12 @@ const getProducts = async (_, res, next) => {
     }
     next({
       status: 404,
-      message: "There is no data",
+      message: "ERROR_IN_PRODUCT",
     });
   } catch (error) {
     next({
       status: 404,
-      message: `Error in products: ${error}`,
+      message: `ERROR_IN_PRODUCT: ${error}`,
     });
   }
 };
@@ -35,14 +35,6 @@ const createProduct = async (req, res, next) => {
       imageList,
     } = req.body;
 
-    // const image = await Image.create({
-    //   images,
-    // });
-
-    // if (!image) {
-    //   throw new Error("Image error");
-    // }
-
     const product = await Product.create({
       userId,
       title,
@@ -55,13 +47,13 @@ const createProduct = async (req, res, next) => {
       imageList,
     });
     if (!product) {
-      throw new Error("Product error");
+      throw new Error("PRODUCT_CREATION_ERROR");
     }
 
     const user = await User.findOne({ _id: userId }).exec();
 
     if (!user) {
-      throw new Error("User error");
+      throw new Error("USER_FIND_ERROR");
     }
 
     console.log(user);
@@ -80,7 +72,7 @@ const createProduct = async (req, res, next) => {
   } catch (error) {
     next({
       status: 404,
-      message: `Error in creation: ${error}`,
+      message: `ERROR_IN_CREATION: ${error}`,
     });
   }
 };
@@ -90,16 +82,16 @@ const addFavorite = async (req, res, next) => {
     const { userId, postId } = req.body;
     const user = await User.findOne({ _id: userId });
     if (!user) {
-      throw new Error("User error");
+      throw new Error("USER_FIND_ERROR");
     }
 
     const updateFavoriteList = await User.updateOne(
       { _id: user._id },
-      { $addToSet: { favoritePosts: postId } }
+      { $addToSet: { favoritePosts: { productId: postId } } }
     );
 
     if (!updateFavoriteList) {
-      throw new Error("Error in Favorite");
+      throw new Error("ERROR_IN_FAVORITES");
     }
 
     return res.json({
@@ -109,14 +101,26 @@ const addFavorite = async (req, res, next) => {
   } catch (error) {
     next({
       status: 404,
-      message: `Error in favorites ${error}`,
+      message: `ERROR_IN_FAVORITES: ${error}`,
     });
   }
 };
 
-// const getFavorite = (req, res, next) => {
-//   const {} = req.body;
+const getFavorite = async (req, res, next) => {
+  const { userId } = req.body;
 
-// };
+  const user = await User.findOne({ _id: userId })
+    .select("favoritePosts")
+    .populate("Product");
+  if (!user) {
+    throw new Error("USER_FIND_ERROR");
+  }
 
-export { getProducts, createProduct, addFavorite };
+  // const product = await Product.find({
+  //   _id: user.favoritePosts.productId,
+  // }).populate("Product");
+  res.json({ user });
+  // const match = await res.json({});
+};
+
+export { getProducts, createProduct, addFavorite, getFavorite };

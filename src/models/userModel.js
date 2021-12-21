@@ -19,10 +19,15 @@ const userSchema = mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  favoritePosts: {
-    type: Array,
-    default: null,
-  },
+  favoritePosts: [
+    {
+      productId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+        required: true,
+      },
+    },
+  ],
 });
 
 userSchema.methods.matchPassword = async function (enteredPassword) {

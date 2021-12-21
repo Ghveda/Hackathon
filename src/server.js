@@ -4,6 +4,10 @@ import userRoute from "./routes/userRoute.js";
 import productRoute from "./routes/productRouter.js";
 import connnectDB from "./config/db.js";
 import { notFount, errorHandler } from "./middleware/errorMiddleware.js";
+import cors from "cors";
+
+app.use(cors());
+app.options("*", cors());
 
 env.config();
 connnectDB();
