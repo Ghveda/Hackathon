@@ -74,8 +74,8 @@ const createProduct = async (req, res, next) => {
       ammount,
       rating,
       category,
-      primaryImage,
-      imageList,
+      primaryImage: product.primaryImage,
+      imageList: product.imageList,
     });
   } catch (error) {
     next({
