@@ -109,9 +109,9 @@ const addFavorite = async (req, res, next) => {
 const getFavorite = async (req, res, next) => {
   const { userId } = req.body;
 
-  const user = await User.findOne({ _id: userId })
+  const user = await Product.findOne({ _id: usefavoritePosts.productId })
     .select("favoritePosts")
-    .populate("Product");
+    .populate("User");
   if (!user) {
     throw new Error("USER_FIND_ERROR");
   }

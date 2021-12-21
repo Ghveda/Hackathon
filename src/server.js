@@ -6,12 +6,11 @@ import connnectDB from "./config/db.js";
 import { notFount, errorHandler } from "./middleware/errorMiddleware.js";
 import cors from "cors";
 
-app.use(cors());
-app.options("*", cors());
-
 env.config();
 connnectDB();
 const app = express();
+app.use(cors());
+app.options("*", cors());
 
 const PORT = process.env.PORT || 5000;
 app.use(express.json());
