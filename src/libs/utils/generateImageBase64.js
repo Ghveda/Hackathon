@@ -1,7 +1,6 @@
 import fs from "fs";
 
 const main = () => {
-  console.log("start coverting");
   const file = fs.readFileSync("src/assets/images/image.jpg", {
     encoding: "base64",
   });

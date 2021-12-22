@@ -3,32 +3,20 @@ import User from "../models/userModel.js";
 
 const getProducts = async (req, res, next) => {
   try {
-    let { skip, limit, category } = req.query;
+    let { skip = 0, limit = 5, category } = req.query;
     let product, ammount, productLength;
 
-    if (!skip) {
-      skip = 0;
+    let where = {};
+
+    if (category) {
+      where.category = category;
     }
 
-    if (!limit) {
-      limit = 5;
-    }
-
-    if (category === undefined) {
-      console.log("!category");
-      productLength = await Product.find().count();
-      product = await Product.find().skip(skip).limit(limit).exec();
-    } else {
-      console.log("category");
-      productLength = await Product.find({ category: category }).count();
-      product = await Product.find({ category: category })
-        .skip(skip)
-        .limit(limit)
-        .exec();
-    }
+    productLength = await Product.find(where).count();
+    product = await Product.find(where).skip(skip).limit(limit).exec();
 
     if (!product) {
-      throw new Error("PRODUCT_IS_UNDEFINE");
+      throw new Error("NOT_FOUND");
     }
 
     ammount = productLength - (skip + limit);
@@ -83,7 +71,6 @@ const createProduct = async (req, res, next) => {
       throw new Error("PRODUCT_CREATION_ERROR");
     }
 
-    console.log(user);
     res.json({
       user: user.username,
       title,

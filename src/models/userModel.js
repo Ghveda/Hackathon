@@ -13,7 +13,12 @@ const userSchema = mongoose.Schema({
   },
   password: {
     type: String,
-    required: true,
+  },
+  facebookId: {
+    type: String,
+  },
+  facebookAccessToken: {
+    type: String,
   },
   isAdmin: {
     type: Boolean,
