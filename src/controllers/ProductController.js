@@ -1,15 +1,44 @@
 import Product from "../models/productModel.js";
 import User from "../models/userModel.js";
 
-const getProducts = async (_, res, next) => {
+const getProducts = async (req, res, next) => {
   try {
-    const product = await Product.find({}).exec();
+    let { skip, limit, category } = req.query;
+    let product, ammount, productLength;
+
+    if (!skip) {
+      skip = 0;
+    }
+
+    if (!limit) {
+      limit = 5;
+    }
+
+    if (category === undefined) {
+      console.log("!category");
+      productLength = await Product.find().count();
+      product = await Product.find().skip(skip).limit(limit).exec();
+    } else {
+      console.log("category");
+      productLength = await Product.find({ category: category }).count();
+      product = await Product.find({ category: category })
+        .skip(skip)
+        .limit(limit)
+        .exec();
+    }
+
     if (!product) {
-      throw new Error("ERROR_IN_PRODUCT");
+      throw new Error("PRODUCT_IS_UNDEFINE");
+    }
+
+    ammount = productLength - (skip + limit);
+    if (ammount < 0) {
+      ammount = 0;
     }
 
     res.json({
-      ...product,
+      ammount,
+      products: product,
     });
   } catch (error) {
     next({

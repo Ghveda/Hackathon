@@ -8,7 +8,7 @@ import {
 
 const route = express.Router();
 
-route.post("/", getProducts);
+route.get("/", getProducts);
 route.post("/create", createProduct);
 route.post("/favorite/add", addFavorite);
 route.post("/favorite", getFavorite);
