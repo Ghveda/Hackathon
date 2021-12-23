@@ -3,17 +3,21 @@ import User from "../models/userModel.js";
 
 const getProducts = async (req, res, next) => {
   try {
-    let { skip = 0, limit = 5, category } = req.query;
-    let product, ammount, productLength;
+    const { skip = 0, limit = 5, category } = req.query;
 
     let where = {};
+    let ammount;
 
     if (category) {
       where.category = category;
     }
 
-    productLength = await Product.find(where).count();
-    product = await Product.find(where).skip(skip).limit(limit).exec();
+    const productLength = await Product.find(where).count();
+    const product = await Product.find(where)
+      .skip(parseInt(skip))
+      .limit(parseInt(limit))
+      .exec();
+    console.log(product.length);
 
     if (!product) {
       throw new Error("NOT_FOUND");
@@ -91,6 +95,31 @@ const createProduct = async (req, res, next) => {
   }
 };
 
+const deleteProduct = async (req, res, next) => {
+  try {
+    const { userId, postId } = req.query;
+    const product = await Product.find({ postId });
+
+    if (!product) {
+      throw new Error("PRODUCT_NOT_FOUND");
+    }
+
+    if (product.userId != userId) {
+      throw new Error("DELETE_IS_NOT_AVAILABLE");
+    }
+
+    product.remove();
+    res.json({
+      message: "done",
+    });
+  } catch (error) {
+    next({
+      status: 404,
+      message: `ERROR_IN_DELETE_PRODUCT: ${error}`,
+    });
+  }
+};
+
 const addFavorite = async (req, res, next) => {
   try {
     const { userId, postId } = req.body;
@@ -141,4 +170,4 @@ const getFavorite = async (req, res, next) => {
   }
 };
 
-export { getProducts, createProduct, addFavorite, getFavorite };
+export { getProducts, createProduct, addFavorite, getFavorite, deleteProduct };
