@@ -3,7 +3,7 @@ import { image } from "../constants.js";
 
 const productSchema = mongoose.Schema({
   userId: {
-    type: mongoose.Types.ObjectId,
+    type: String,
     require: true,
   },
   username: {

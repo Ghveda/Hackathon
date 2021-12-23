@@ -8,7 +8,7 @@ route.get("/auth", passport.authenticate("facebook"));
 
 // callback
 route.get(
-  "/",
+  "/callback",
   passport.authenticate("facebook", { failureRedirect: "/failed" }),
   function (req, res) {
     res.redirect("/");

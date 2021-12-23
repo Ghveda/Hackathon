@@ -25,7 +25,7 @@ const PORT = process.env.PORT || 5000;
 // routes
 app.use("/user", userRoute);
 app.use("/product", productRoute);
-app.use("/facebook", facebookRoute);
+app.use("/people/auth/facebook", facebookRoute);
 
 // error middleware
 app.use(notFount);

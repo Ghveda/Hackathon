@@ -17,7 +17,6 @@ const getProducts = async (req, res, next) => {
       .skip(parseInt(skip))
       .limit(parseInt(limit))
       .exec();
-    console.log(product.length);
 
     if (!product) {
       throw new Error("NOT_FOUND");
@@ -97,18 +96,17 @@ const createProduct = async (req, res, next) => {
 
 const deleteProduct = async (req, res, next) => {
   try {
-    const { userId, postId } = req.query;
-    const product = await Product.find({ postId });
+    const { postId, userId } = req.query;
+    const product = await Product.findOne({ postId });
 
     if (!product) {
       throw new Error("PRODUCT_NOT_FOUND");
     }
 
     if (product.userId != userId) {
-      throw new Error("DELETE_IS_NOT_AVAILABLE");
+      throw new Error("DELETE_NOT_ALLOWED");
     }
 
-    product.remove();
     res.json({
       message: "done",
     });
