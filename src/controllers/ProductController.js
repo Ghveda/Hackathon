@@ -57,6 +57,7 @@ const createProduct = async (req, res, next) => {
     }
 
     const product = await Product.create({
+      userId,
       username: user.username,
       title,
       description,
