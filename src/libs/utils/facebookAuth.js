@@ -12,8 +12,7 @@ const facebookStrategy = () => {
       {
         clientID: process.env.FACEBOOK_APP_ID,
         clientSecret: process.env.FACEBOOK_APP_SECRET,
-        callbackURL:
-          process.env.FACEBOOK_CALLBACK || "http://localhost:5000/facebook",
+        callbackURL: process.env.FACEBOOK_CALLBACK,
         profileFields: ["id", "displayName", "email"],
       },
       async function (accessToken, refreshToken, profile, done) {
