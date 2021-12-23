@@ -3,27 +3,21 @@ import passport from "passport";
 
 const route = express.Router();
 
-route.get("/", (_, res) => {
-  res.send("done");
-});
+// main endpoint
+route.get("/auth", passport.authenticate("facebook"));
 
+// callback
+route.get(
+  "/",
+  passport.authenticate("facebook", { failureRedirect: "/failed" }),
+  function (req, res) {
+    res.redirect("/");
+  }
+);
+
+// failed
 route.get("/failed", (_, res) => {
   res.send("failed");
 });
-route.get(
-  "/facebook",
-  passport.authenticate("facebook", {
-    successRedirect: "/",
-    failureRedirect: "/failed",
-  })
-);
-
-route.get(
-  "/auth",
-  passport.authenticate("facebook", { failureRedirect: "/login" }),
-  function (req, res, next) {
-    next();
-  }
-);
 
 export default route;
