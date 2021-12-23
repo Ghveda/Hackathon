@@ -38,7 +38,7 @@ app.use("/", facebookRoute);
 // error middleware
 app.use(notFount);
 app.use(errorHandler);
-
+console.log(process.env.FACEBOOK_CALLBACK);
 // PORT
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on ${PORT}`);

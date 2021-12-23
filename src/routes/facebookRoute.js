@@ -20,7 +20,10 @@ route.get(
 
 route.get(
   "/auth",
-  passport.authenticate("facebook", { failureRedirect: "/login" })
+  passport.authenticate("facebook", { failureRedirect: "/login" }),
+  function (req, res, next) {
+    next();
+  }
 );
 
 export default route;
