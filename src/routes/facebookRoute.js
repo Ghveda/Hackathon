@@ -18,6 +18,7 @@ route.get(
     console.log("req.body: ", req.body);
     console.log("req.query: ", req.query);
     console.log("req.params: ", req.params);
+    res.redirect("www.google.com");
   }
 );
 
