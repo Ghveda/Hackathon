@@ -1,6 +1,6 @@
 import express from "express";
 import passport from "passport";
-import { facebookAuth } from "../controllers/UserController";
+import { facebookAuth } from "../controllers/UserController.js";
 
 const route = express.Router();
 
