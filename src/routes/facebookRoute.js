@@ -14,8 +14,10 @@ route.get("/", facebookAuth);
 route.get(
   "/callback",
   passport.authenticate("facebook", { failureRedirect: "/failed" }),
-  function (_, res) {
-    res.redirect("/people/auth/facebook");
+  function (req, res) {
+    console.log("req.body: ", req.body);
+    console.log("req.query: ", req.query);
+    console.log("req.params: ", req.params);
   }
 );
 
