@@ -149,7 +149,7 @@ const addFavorite = async (req, res, next) => {
 
 const getFavorite = async (req, res, next) => {
   try {
-    const { userId } = req.body;
+    const { userId } = req.query;
 
     const user = await User.findOne({ _id: userId }).populate(
       "favoritePosts.productId"
