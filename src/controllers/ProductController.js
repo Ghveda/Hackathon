@@ -6,7 +6,7 @@ const getProducts = async (req, res, next) => {
     const { skip = 0, limit = 5, category } = req.query;
 
     let where = {};
-    let ammount;
+    let amount;
 
     if (category) {
       where.category = category;
@@ -22,13 +22,13 @@ const getProducts = async (req, res, next) => {
       throw new Error("NOT_FOUND");
     }
 
-    ammount = productLength - (skip + limit);
-    if (ammount < 0) {
-      ammount = 0;
+    amount = productLength - (skip + limit);
+    if (amount < 0) {
+      amount = 0;
     }
 
     res.json({
-      ammount,
+      amount,
       products: product,
     });
   } catch (error) {
