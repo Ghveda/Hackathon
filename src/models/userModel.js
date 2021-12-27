@@ -18,6 +18,9 @@ const userSchema = mongoose.Schema({
   facebookAccessToken: {
     type: String,
   },
+  facebookRefreshToken: {
+    type: String,
+  },
   isAdmin: {
     type: Boolean,
     default: false,

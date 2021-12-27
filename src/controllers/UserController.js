@@ -66,11 +66,4 @@ const authUser = async (req, res, next) => {
   }
 };
 
-const facebookAuth = (req, res, next) => {
-  console.log("req.body: ", req.body);
-  console.log("req.query: ", req.query);
-  console.log("req.params: ", req.params);
-  next();
-};
-
-export { registerUser, authUser, facebookAuth };
+export { registerUser, authUser };
