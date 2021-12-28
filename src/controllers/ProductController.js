@@ -143,7 +143,6 @@ const deleteProduct = async (req, res, next) => {
   }
 };
 
-// dasamatebeli
 const deleteFavorite = async (req, res, next) => {
   try {
     const { postId } = req.query;
@@ -178,6 +177,14 @@ const addFavorite = async (req, res, next) => {
     }
     if (!product) {
       throw new Error("PRODUCT_NOT_FOUND");
+    }
+
+    if (user.favoritePosts.includes(product._id)) {
+      return res.json({
+        ...user,
+        user: user.username,
+        favorite: user.favoritePosts,
+      });
     }
 
     user.favoritePosts.push(product);
