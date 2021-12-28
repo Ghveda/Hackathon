@@ -2,7 +2,7 @@ import passport from "passport";
 import { Strategy } from "passport-facebook";
 import dotenv from "dotenv";
 import User from "../../models/userModel.js";
-import generateToken from "./generateToken.js";
+import { generateToken } from "./generateToken.js";
 
 dotenv.config();
 // facebook

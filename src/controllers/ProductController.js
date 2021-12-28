@@ -1,5 +1,6 @@
 import Product from "../models/productModel.js";
 import User from "../models/userModel.js";
+import { decodeToken } from "../libs/utils/generateToken.js";
 
 const getProducts = async (req, res, next) => {
   try {
@@ -19,7 +20,7 @@ const getProducts = async (req, res, next) => {
       .exec();
 
     if (!product) {
-      throw new Error("NOT_FOUND");
+      throw new Error("PRODUCT_NOT_FOUND");
     }
 
     amount = productLength - (skip + limit);
@@ -39,10 +40,27 @@ const getProducts = async (req, res, next) => {
   }
 };
 
+const getProduct = async (req, res, next) => {
+  try {
+    const { productId } = req.query;
+    const product = await Product.findOne({ _id: productId });
+
+    if (!product) {
+      throw new Error("PRODUCT_NOT_FOUND");
+    }
+
+    res.json(product);
+  } catch (error) {
+    next({
+      status: 404,
+      message: `ERROR_IN_PRODUCT: ${error}`,
+    });
+  }
+};
+
 const createProduct = async (req, res, next) => {
   try {
     const {
-      userId,
       title,
       description,
       price,
@@ -53,14 +71,17 @@ const createProduct = async (req, res, next) => {
       imageList,
     } = req.body;
 
-    const user = await User.findOne({ _id: userId }).exec();
+    const { token } = req.headers;
+    const userData = decodeToken(token);
+
+    const user = await User.findOne({ _id: userData.id }).exec();
 
     if (!user) {
       throw new Error("USER_FIND_ERROR");
     }
 
     const product = await Product.create({
-      userId,
+      userId: user._id,
       username: user.username,
       title,
       description,
@@ -96,17 +117,21 @@ const createProduct = async (req, res, next) => {
 
 const deleteProduct = async (req, res, next) => {
   try {
-    const { postId, userId } = req.query;
+    const { postId } = req.query;
+    const { token } = req.headers;
+    const user = decodeToken(token);
+
     const product = await Product.findOne({ postId });
 
     if (!product) {
       throw new Error("PRODUCT_NOT_FOUND");
     }
-
-    if (product.userId != userId) {
+    console.log(user.id);
+    console.log("productId", product.userId);
+    if (product.userId != user.id) {
       throw new Error("DELETE_NOT_ALLOWED");
     }
-
+    await product.remove();
     res.json({
       message: "done",
     });
@@ -118,28 +143,55 @@ const deleteProduct = async (req, res, next) => {
   }
 };
 
-const addFavorite = async (req, res, next) => {
+// dasamatebeli
+const deleteFavorite = async (req, res, next) => {
   try {
-    const { userId, postId } = req.body;
-    const user = await User.findOne({ _id: userId });
+    const { postId } = req.query;
+    const { token } = req.headers;
+    const userToken = decodeToken(token);
+
+    const user = await User.findOne({ _id: userToken.id });
     if (!user) {
       throw new Error("USER_FIND_ERROR");
     }
+    user.favoritePosts.pop(postId);
+    await user.save();
+    res.json("done");
+  } catch (error) {
+    next({
+      status: 404,
+      message: `ERROR_IN_DELETE_FAVORITE: ${error}`,
+    });
+  }
+};
 
-    const updateFavoriteList = await User.updateOne(
-      { _id: user._id },
-      { $addToSet: { favoritePosts: { productId: postId } } }
-    );
+const addFavorite = async (req, res, next) => {
+  try {
+    const { postId } = req.body;
+    const { token } = req.headers;
+    const userToken = decodeToken(token);
 
-    if (!updateFavoriteList) {
-      throw new Error("ERROR_IN_FAVORITES");
+    const product = await Product.findOne({ _id: postId });
+    const user = await User.findOne({ _id: userToken.id });
+    if (!user) {
+      throw new Error("USER_FIND_ERROR");
+    }
+    if (!product) {
+      throw new Error("PRODUCT_NOT_FOUND");
     }
 
+    user.favoritePosts.push(product);
+    await user.save();
+
+    await user.populate("favoritePosts");
+
     return res.json({
+      ...user,
       user: user.username,
       favorite: user.favoritePosts,
     });
   } catch (error) {
+    console.error(error);
     next({
       status: 404,
       message: `ERROR_IN_FAVORITES: ${error}`,
@@ -149,10 +201,11 @@ const addFavorite = async (req, res, next) => {
 
 const getFavorite = async (req, res, next) => {
   try {
-    const { userId } = req.query;
+    const { token } = req.headers;
+    const userToken = decodeToken(token);
 
-    const user = await User.findOne({ _id: userId }).populate(
-      "favoritePosts.productId"
+    const user = await User.findOne({ _id: userToken.id }).populate(
+      "favoritePosts"
     );
 
     if (!user) {
@@ -168,4 +221,12 @@ const getFavorite = async (req, res, next) => {
   }
 };
 
-export { getProducts, createProduct, addFavorite, getFavorite, deleteProduct };
+export {
+  getProducts,
+  getProduct,
+  createProduct,
+  addFavorite,
+  getFavorite,
+  deleteProduct,
+  deleteFavorite,
+};

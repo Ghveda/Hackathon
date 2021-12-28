@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
-const userSchema = mongoose.Schema({
+const userSchema = new mongoose.Schema({
   username: {
     type: String,
     required: true,
@@ -27,11 +27,9 @@ const userSchema = mongoose.Schema({
   },
   favoritePosts: [
     {
-      productId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
-        required: true,
-      },
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product",
+      required: true,
     },
   ],
 });
