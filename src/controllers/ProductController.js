@@ -1,4 +1,5 @@
 import Product from "../models/productModel.js";
+import Image from "../models/imageModel.js";
 import User from "../models/userModel.js";
 import { decodeToken } from "../libs/utils/generateToken.js";
 
@@ -15,6 +16,7 @@ const getProducts = async (req, res, next) => {
 
     const productLength = await Product.find(where).count();
     const product = await Product.find(where)
+      .populate("imageId")
       .skip(parseInt(skip))
       .limit(parseInt(limit))
       .exec();
@@ -43,7 +45,9 @@ const getProducts = async (req, res, next) => {
 const getProduct = async (req, res, next) => {
   try {
     const { productId } = req.query;
-    const product = await Product.findOne({ _id: productId });
+    const product = await Product.findOne({ _id: productId }).populate(
+      "imageId"
+    );
 
     if (!product) {
       throw new Error("PRODUCT_NOT_FOUND");
@@ -75,6 +79,10 @@ const createProduct = async (req, res, next) => {
     const userData = decodeToken(token);
 
     const user = await User.findOne({ _id: userData.id }).exec();
+    const image = await Image.create({
+      primaryImage: primaryImage,
+      imageList: imageList,
+    });
 
     if (!user) {
       throw new Error("USER_FIND_ERROR");
@@ -91,21 +99,16 @@ const createProduct = async (req, res, next) => {
       category,
       primaryImage,
       imageList,
+      imageId: image._id,
     });
     if (!product) {
       throw new Error("PRODUCT_CREATION_ERROR");
     }
 
+    const getImages = await product.populate("imageId");
+
     res.json({
-      user: user.username,
-      title,
-      description,
-      price,
-      ammount,
-      rating,
-      category,
-      primaryImage: product.primaryImage,
-      imageList: product.imageList,
+      product: getImages,
     });
   } catch (error) {
     next({
@@ -126,11 +129,16 @@ const deleteProduct = async (req, res, next) => {
     if (!product) {
       throw new Error("PRODUCT_NOT_FOUND");
     }
-    console.log(user.id);
-    console.log("productId", product.userId);
+
     if (product.userId != user.id) {
       throw new Error("DELETE_NOT_ALLOWED");
     }
+    const image = await Image.findByIdAndDelete({ _id: product.imageId });
+
+    if (!image) {
+      throw new Error("IMAGES_NOT_DELETED");
+    }
+
     await product.remove();
     res.json({
       message: "done",
@@ -198,7 +206,6 @@ const addFavorite = async (req, res, next) => {
       favorite: user.favoritePosts,
     });
   } catch (error) {
-    console.error(error);
     next({
       status: 404,
       message: `ERROR_IN_FAVORITES: ${error}`,
@@ -218,8 +225,11 @@ const getFavorite = async (req, res, next) => {
     if (!user) {
       throw new Error("USER_VALIDATE_ERROR");
     }
+    const images = await user.populate({
+      path: "favoritePosts.imageId",
+    });
 
-    res.json({ favorite: user.favoritePosts });
+    res.json({ favorite: images });
   } catch (error) {
     next({
       status: 404,
