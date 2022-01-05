@@ -1,5 +1,6 @@
 import express from "express";
 import env from "dotenv";
+import bodyParser from "body-parser";
 import userRoute from "./routes/userRoute.js";
 import productRoute from "./routes/productRouter.js";
 import facebookRoute from "./routes/facebookRoute.js";
@@ -12,7 +13,7 @@ import facebookStrategy from "./libs/utils/facebookAuth.js";
 env.config();
 connnectDB();
 const app = express();
-app.use(express.json());
+app.use(bodyParser.json({ limit: "50mb" }));
 
 app.use(cors());
 app.options("*", cors());
